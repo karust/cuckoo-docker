@@ -1,0 +1,92 @@
+version: "2"
+
+services:
+  cuckoo:
+    image: amf_cuckoo
+    command: daemon
+    ports:
+      - "2042:2042"
+    volumes:
+      - ./volumes/tmp/:/tmp/cuckoo-tmp/
+      - ./volumes/storage/:/cuckoo/storage/
+      - F:/Program Files/Oracle/VirtualBox/:/home
+    networks:
+      - cuckoo
+    env_file:
+      - ./config-file.env
+
+  # web:
+  #   image: amf_cuckoo
+  #   ports:
+  #     - "8080:31337"
+  #   links:
+  #     - mongo
+  #     - postgres
+  #   command: web
+  #   volumes:
+  #     - ./volumes/tmp/:/tmp/cuckoo-tmp/
+  #     - ./volumes/storage/:/cuckoo/storage/
+  #   networks:
+  #     - cuckoo
+  #   env_file:
+  #     - ./config-file.env
+
+  # api:
+  #   depends_on:
+  #     - postgres
+  #   image: amf_cuckoo
+  #   ports:
+  #     - "9090:1337"
+  #   links:
+  #     - postgres
+  #   command: api
+  #   volumes:
+  #     - ./volumes/tmp/:/tmp/cuckoo-tmp/
+  #     - ./volumes/storage/:/cuckoo/storage/
+  #   networks:
+  #     - cuckoo
+  #   env_file:
+  #     - ./config-file.env
+
+  # nginx:
+  #   build: nginx/.
+  #   depends_on:
+  #     - mongo
+  #   ports:
+  #     - "80:80"
+  #   links:
+  #     - mongo
+  #   networks:
+  #     - cuckoo
+
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./volumes/mongo/:/data/db
+    networks:
+      - cuckoo
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cuckoo
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_INITDB_ARGS: --data-checksums
+    volumes:
+      - ./volumes/postgres/:/var/lib/postgresql/data/pgdata
+    networks:
+      - cuckoo
+
+networks:
+  cuckoo:
+    driver: bridge
+
+volumes:
+  cuckoo-data:
+  mongo-data:
+  postgres-data:
