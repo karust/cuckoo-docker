@@ -1,4 +1,5 @@
 pillow==3.2
+remotevbox==0.6.0
 #python-magic-bin==0.4.14
 alembic==1.0.10
 androguard==3.0.1

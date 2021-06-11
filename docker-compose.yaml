@@ -2,16 +2,21 @@ version: "2"
 
 services:
   cuckoo:
-    image: amf_cuckoo
+    build:
+      dockerfile: Dockerfile
+      context: .
+      args:
+        - CUCKOO_UID=1000
     command: daemon
     ports:
       - "2042:2042"
     volumes:
       - ./volumes/tmp/:/tmp/cuckoo-tmp/
       - ./volumes/storage/:/cuckoo/storage/
-      - F:/Program Files/Oracle/VirtualBox/:/home
-    networks:
-      - cuckoo
+      - ./conf/:/cuckoo/conf/
+    # networks:
+    #   - cuckoo
+    #   - host
     env_file:
       - ./config-file.env
 
@@ -65,8 +70,8 @@ services:
       - 27017:27017
     volumes:
       - ./volumes/mongo/:/data/db
-    networks:
-      - cuckoo
+    # networks:
+    #   - cuckoo
 
   postgres:
     image: postgres
@@ -76,15 +81,18 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: cuckoo
       PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_INITDB_ARGS: --data-checksums
+      #POSTGRES_INITDB_ARGS: --data-checksums
     volumes:
       - ./volumes/postgres/:/var/lib/postgresql/data/pgdata
-    networks:
-      - cuckoo
+    # networks:
+    #   - cuckoo
 
-networks:
-  cuckoo:
-    driver: bridge
+# networks:
+#   cuckoo:
+#     driver: bridge
+#   host:
+#     driver: bridge
+#     external: true
 
 volumes:
   cuckoo-data:

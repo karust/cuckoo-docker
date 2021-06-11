@@ -360,29 +360,30 @@ def init_yara():
 def init_binaries():
     """Inform the user about the need to periodically look for new analyzer
     binaries. These include the Windows monitor etc."""
-    def throw():
-        raise CuckooStartupError(
-            "The binaries used for Windows analysis are updated regularly, "
-            "independently from the release line. It appears that you're "
-            "not up-to-date. This may happen when you've just installed the "
-            "latest development version of Cuckoo or when you've updated "
-            "to the latest Cuckoo. In order to get up-to-date, please run "
-            "the following command: `cuckoo community`."
-        )
+    log.debug("Binary initialization skipped.")
+    # def throw():
+    #     raise CuckooStartupError(
+    #         "The binaries used for Windows analysis are updated regularly, "
+    #         "independently from the release line. It appears that you're "
+    #         "not up-to-date. This may happen when you've just installed the "
+    #         "latest development version of Cuckoo or when you've updated "
+    #         "to the latest Cuckoo. In order to get up-to-date, please run "
+    #         "the following command: `cuckoo community`."
+    #     )
 
-    dirpath = cwd("monitor", "latest")
+    # dirpath = cwd("monitor", "latest")
 
-    # If "latest" is a symbolic link, check that it exists.
-    if os.path.islink(dirpath):
-        if not os.path.exists(dirpath):
-            throw()
-    # If "latest" is a file, check that it contains a legitimate hash.
-    elif os.path.isfile(dirpath):
-        monitor = os.path.basename(open(dirpath, "rb").read().strip())
-        if not monitor or not os.path.isdir(cwd("monitor", monitor)):
-            throw()
-    else:
-        throw()
+    # # If "latest" is a symbolic link, check that it exists.
+    # if os.path.islink(dirpath):
+    #     if not os.path.exists(dirpath):
+    #         throw()
+    # # If "latest" is a file, check that it contains a legitimate hash.
+    # elif os.path.isfile(dirpath):
+    #     monitor = os.path.basename(open(dirpath, "rb").read().strip())
+    #     if not monitor or not os.path.isdir(cwd("monitor", monitor)):
+    #         throw()
+    # else:
+    #     throw()
 
 def init_rooter():
     """If required, check if the rooter is running and if we can connect

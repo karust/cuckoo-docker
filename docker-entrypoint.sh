@@ -87,12 +87,19 @@ waitFor() {
     echo >&2 "Address: ${1}:${2}"
 }
 
+setUID() {
+  if [ ! "$CUCKOO_UID" == "" ]; then
+    echo "===> Changing cuckoo uid to $CUCKOO_UID"
+    usermod -u "$CUCKOO_UID" cuckoo
+    echo "Done!"
+  fi
+}
+
 setUpCuckoo(){
   echo "===> Use default ports and hosts if not specified..."
   setDefaults
   echo
-  echo "===> Update /cuckoo/conf/reporting.conf if needed..."
-  /update_conf.py
+  setUID
   echo
   # Wait until all services are started
   # if [ ! "$ES_HOST" == "" ]; then
@@ -108,59 +115,35 @@ setUpCuckoo(){
   fi
 }
 
-# Add cuckoo as command if needed
-if [ "${1:0:1}" = '-' ]; then
-  echo -n "Setting up Cuckoo"
-  setUpCuckoo
-  # Change the ownership of /cuckoo to cuckoo
-  chown -R cuckoo:cuckoo /cuckoo
-  cd /cuckoo/
-
-  set -- su-exec cuckoo /sbin/tini -- cuckoo "$@"
-fi
-
 # Drop root privileges if we are running cuckoo-daemon
-if [ "$1" = 'daemon' -a "$(id -u)" = '0' ]; then
-  echo -n "[daemon]"
+if [ "$1" = 'daemon' ]; then
   shift
   # If not set default to 0.0.0.0
   export RESULTSERVER=${RESULTSERVER:=0.0.0.0}
   setUpCuckoo
-  # Change the ownership of /cuckoo to cuckoo
-  chown -R cuckoo:cuckoo /cuckoo
   cd /cuckoo
   rm -rf pidfiles/*.pid
 
-  set -- su-exec cuckoo /sbin/tini -- cuckoo -d "$@"
+  su-exec cuckoo cuckoo -d "$@"
 
-elif [ "$1" = 'submit' -a "$(id -u)" = '0' ]; then
-  echo -n "[submit]"
+elif [ "$1" = 'submit' ]; then
   shift
   setUpCuckoo
-  # Change the ownership of /cuckoo to cuckoo
-  chown -R cuckoo:cuckoo /cuckoo
+  su-exec cuckoo cuckoo submit "$@"
 
-  set -- su-exec cuckoo /sbin/tini -- cuckoo submit "$@"
-
-elif [ "$1" = 'api' -a "$(id -u)" = '0' ]; then
-  echo -n "[api]"
+elif [ "$1" = 'api' ]; then
   setUpCuckoo
-  # Change the ownership of /cuckoo to cuckoo
-  chown -R cuckoo:cuckoo /cuckoo
+  su-exec cuckoo cuckoo api --host 0.0.0.0 --port 1337
 
-  set -- su-exec cuckoo /sbin/tini -- cuckoo api --host 0.0.0.0 --port 1337
-
-elif [ "$1" = 'web' -a "$(id -u)" = '0' ]; then
-  echo -n "[web]"
+elif [ "$1" = 'web' ]; then
   setUpCuckoo
+
+  chown -R cuckoo:cuckoo /cuckoo/web
   if [ -z "$MONGO_HOST" ]; then
     echo >&2 "[ERROR] MongoDB cannot be found. Please link mongo and try again..."
     exit 1
   fi
-  # Change the ownership of /cuckoo to cuckoo
-  chown -R cuckoo:cuckoo /cuckoo
-
-  set -- su-exec cuckoo /sbin/tini -- cuckoo web runserver 0.0.0.0:31337
+  su-exec cuckoo cuckoo web runserver 0.0.0.0:31337
 fi
 
 exec "$@"
