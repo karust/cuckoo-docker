@@ -12,11 +12,11 @@ from cuckoo.common.exceptions import (
     CuckooCriticalError, CuckooMachineError, CuckooDependencyError
 )
 
-try:
-    import remotevbox
-    HAVE_REMOTEVBOX = True
-except ImportError:
-    HAVE_REMOTEVBOX = False
+#try:
+import remotevbox
+HAVE_REMOTEVBOX = True
+#except ImportError:
+#    HAVE_REMOTEVBOX = False
 
 log = logging.getLogger(__name__)
 

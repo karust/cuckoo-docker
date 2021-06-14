@@ -10,6 +10,7 @@ services:
     command: daemon
     ports:
       - "2042:2042"
+      - "18083:18083"
     volumes:
       - ./volumes/tmp/:/tmp/cuckoo-tmp/
       - ./volumes/storage/:/cuckoo/storage/

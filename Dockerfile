@@ -11,6 +11,7 @@ RUN apk update && apk add --no-cache  \
   tini \
   bash\
   openssl \
+  libxslt \
   libjpeg \
   libmagic \
   libpq \
@@ -24,8 +25,8 @@ RUN apk add --no-cache -t .build-deps \
   make \
   linux-headers \
   openssl-dev \
-  libxslt-dev \
   libxml2-dev \
+  libxslt-dev \
   build-base \
   libstdc++ \
   zlib-dev \
