@@ -99,6 +99,10 @@ setUpCuckoo(){
   echo "===> Use default ports and hosts if not specified..."
   setDefaults
   echo
+  echo "===> Update configs needed..."
+  python /update_conf.py
+  echo
+  echo
   setUID
   echo
   # Wait until all services are started
