@@ -1,58 +1,104 @@
 version: "2"
 
 services:
-  cuckoo:
+  build_image:
     build:
       dockerfile: Dockerfile
       context: .
       args:
         - CUCKOO_UID=1000
+    image: amf_cuckoo:0.1  
+  
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./volumes/mongo/:/data/db
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cuckoo
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./volumes/postgres/:/var/lib/postgresql/data/pgdata
+
+  cuckoo:
+    container_name: cuckoo
+    depends_on:
+      - build_image
+      - postgres
+      - mongo
+    image: amf_cuckoo:0.1  
     command: daemon
     ports:
       - "2042:2042"
       - "18083:18083"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./volumes/tmp/:/tmp/cuckoo-tmp/
       - ./volumes/storage/:/cuckoo/storage/
       - ./conf/:/cuckoo/conf/
-    # networks:
-    #   - cuckoo
-    #   - host
     env_file:
       - ./config-file.env
+    restart: unless-stopped
+      
+  web:
+    container_name: cuckoo_web
+    depends_on:
+      - cuckoo
+    image: amf_cuckoo:0.1  
+    ports:
+      - "9091:31337"
+    links:
+      - mongo
+      - postgres
+    command: web
+    volumes:
+      - ./volumes/tmp/:/tmp/cuckoo-tmp/
+      - ./volumes/storage/:/cuckoo/storage/
+    env_file:
+      - ./config-file.env
+    restart: unless-stopped
 
-  # web:
-  #   image: amf_cuckoo
-  #   ports:
-  #     - "8080:31337"
-  #   links:
-  #     - mongo
-  #     - postgres
-  #   command: web
-  #   volumes:
-  #     - ./volumes/tmp/:/tmp/cuckoo-tmp/
-  #     - ./volumes/storage/:/cuckoo/storage/
-  #   networks:
-  #     - cuckoo
-  #   env_file:
-  #     - ./config-file.env
+  api:
+    container_name: cuckoo_api
+    depends_on:
+      - cuckoo
+    image: amf_cuckoo:0.1 
+    ports:
+      - "9092:1337"
+    links:
+      - postgres
+    command: api
+    volumes:
+      - ./volumes/tmp/:/tmp/cuckoo-tmp/
+      - ./volumes/storage/:/cuckoo/storage/
+    env_file:
+      - ./config-file.env
+    restart: unless-stopped
 
-  # api:
-  #   depends_on:
-  #     - postgres
-  #   image: amf_cuckoo
-  #   ports:
-  #     - "9090:1337"
-  #   links:
-  #     - postgres
-  #   command: api
-  #   volumes:
-  #     - ./volumes/tmp/:/tmp/cuckoo-tmp/
-  #     - ./volumes/storage/:/cuckoo/storage/
-  #   networks:
-  #     - cuckoo
-  #   env_file:
-  #     - ./config-file.env
+  distributed:
+    container_name: cuckoo_dist
+    depends_on:
+      - cuckoo
+    image: amf_cuckoo:0.1  
+    ports:
+      - "9093:1338"
+    links:
+      - postgres
+    command: dist
+    volumes:
+      - ./volumes/tmp/:/tmp/cuckoo-tmp/
+      - ./volumes/storage/:/cuckoo/storage/
+    env_file:
+      - ./config-file.env
+    restart: unless-stopped
 
   # nginx:
   #   build: nginx/.
@@ -64,36 +110,6 @@ services:
   #     - mongo
   #   networks:
   #     - cuckoo
-
-  mongo:
-    image: mongo
-    ports:
-      - 27017:27017
-    volumes:
-      - ./volumes/mongo/:/data/db
-    # networks:
-    #   - cuckoo
-
-  postgres:
-    image: postgres
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: cuckoo
-      PGDATA: /var/lib/postgresql/data/pgdata
-      #POSTGRES_INITDB_ARGS: --data-checksums
-    volumes:
-      - ./volumes/postgres/:/var/lib/postgresql/data/pgdata
-    # networks:
-    #   - cuckoo
-
-# networks:
-#   cuckoo:
-#     driver: bridge
-#   host:
-#     driver: bridge
-#     external: true
 
 volumes:
   cuckoo-data:

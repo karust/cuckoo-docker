@@ -44,3 +44,6 @@ volumes/postgres/*
 volumes/storage/*
 volumes/tmp/*
 
+__files
+.cwd
+sandbox/cuckoo/private/cwd/hashes.txt

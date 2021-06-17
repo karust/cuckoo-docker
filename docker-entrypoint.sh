@@ -135,6 +135,10 @@ elif [ "$1" = 'api' ]; then
   setUpCuckoo
   su-exec cuckoo cuckoo api --host 0.0.0.0 --port 1337
 
+elif [ "$1" = 'dist' ]; then
+  setUpCuckoo
+  su-exec cuckoo cuckoo distributed server --host 0.0.0.0 --port 1338
+
 elif [ "$1" = 'web' ]; then
   setUpCuckoo
 
