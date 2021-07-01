@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -128,20 +128,20 @@ if [ "$1" = 'daemon' ]; then
   cd /cuckoo
   rm -rf pidfiles/*.pid
 
-  su-exec cuckoo cuckoo -d "$@"
+  cuckoo -d "$@"
 
 elif [ "$1" = 'submit' ]; then
   shift
   setUpCuckoo
-  su-exec cuckoo cuckoo submit "$@"
+  cuckoo submit "$@"
 
 elif [ "$1" = 'api' ]; then
   setUpCuckoo
-  su-exec cuckoo cuckoo api --host 0.0.0.0 --port 1337
+  cuckoo api --host 0.0.0.0 --port 1337
 
 elif [ "$1" = 'dist' ]; then
   setUpCuckoo
-  su-exec cuckoo cuckoo distributed server --host 0.0.0.0 --port 1338
+  cuckoo distributed server --host 0.0.0.0 --port 1338
 
 elif [ "$1" = 'web' ]; then
   setUpCuckoo
@@ -151,7 +151,7 @@ elif [ "$1" = 'web' ]; then
     echo >&2 "[ERROR] MongoDB cannot be found. Please link mongo and try again..."
     exit 1
   fi
-  su-exec cuckoo cuckoo web runserver 0.0.0.0:31337
+  cuckoo web runserver 0.0.0.0:31337
 fi
 
 exec "$@"

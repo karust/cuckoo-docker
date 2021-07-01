@@ -7,7 +7,7 @@ services:
       context: .
       args:
         - CUCKOO_UID=1000
-    image: amf_cuckoo:0.1  
+    image: amf_cuckoo:0.2  
   
   mongo:
     image: mongo
@@ -33,7 +33,7 @@ services:
       - build_image
       - postgres
       - mongo
-    image: amf_cuckoo:0.1  
+    image: amf_cuckoo:0.2  
     command: daemon
     ports:
       - "2042:2042"
@@ -52,7 +52,7 @@ services:
     container_name: cuckoo_web
     depends_on:
       - cuckoo
-    image: amf_cuckoo:0.1  
+    image: amf_cuckoo:0.2  
     ports:
       - "9091:31337"
     links:
@@ -70,7 +70,7 @@ services:
     container_name: cuckoo_api
     depends_on:
       - cuckoo
-    image: amf_cuckoo:0.1 
+    image: amf_cuckoo:0.2 
     ports:
       - "9092:1337"
     links:
@@ -83,22 +83,23 @@ services:
       - ./config-file.env
     restart: unless-stopped
 
-  distributed:
-    container_name: cuckoo_dist
-    depends_on:
-      - cuckoo
-    image: amf_cuckoo:0.1  
-    ports:
-      - "9093:1338"
-    links:
-      - postgres
-    command: dist
-    volumes:
-      - ./volumes/tmp/:/tmp/cuckoo-tmp/
-      - ./volumes/storage/:/cuckoo/storage/
-    env_file:
-      - ./config-file.env
-    restart: unless-stopped
+  # distributed:
+  #   container_name: cuckoo_dist
+  #   depends_on:
+  #     - mongo
+  #     - cuckoo
+  #   image: amf_cuckoo:0.2  
+  #   ports:
+  #     - "9093:1338"
+  #   links:
+  #     - postgres
+  #   command: dist
+  #   volumes:
+  #     - ./volumes/tmp/:/tmp/cuckoo-tmp/
+  #     - ./volumes/storage/:/cuckoo/storage/
+  #   env_file:
+  #     - ./config-file.env
+  #   restart: unless-stopped
 
   # nginx:
   #   build: nginx/.
